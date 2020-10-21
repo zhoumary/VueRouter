@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+        <script src="vue.js" type="text/javascript" charset="UTF-8"></script>
+        <title>Vue Router</title>
+        <link rel="stylesheet" href="https://cache.amap.com/lbs/static/main1119.css"/>
+        <script type="text/javascript" src="https://cache.amap.com/lbs/static/addToolbar.js"></script>
+        <script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.15&key=411e5b31c281c0c5d09266a3ea2b7983&plugin=AMap.Geolocation,AMap.Autocomplete,AMap.PlaceSearch,AMap.Geocoder"></script>
+    </head>
+    <body>
+        <div id="app">
+            <div id="searchFlex">
+                <form id="search">
+                    <label for="fname">City:</label>
+                    <input type="text" id="city" name="city" @input="onCityChange($event.target.value)"><br><br>
+                    <label for="lname">Keywords:</label>
+                    <input type="text" id="keywords" name="keywords" @input="onKeywordsChange($event.target.value)" @change="loadPlaceSearch"><br><br>
+                </form>
+            </div>
+
+            <div id="container"></div>
+            <div id="panel"></div>
+        </div>
+        <script type="text/javascript">
+            var app = new Vue({
+                el: '#app',
+                data: {
+                    map: null,
+                    city: "",
+                    keywords: ""
+                },
+                methods: {
+                    createMap: function() {
+                        this.map = new AMap.Map('container', {
+                            zoom: 11, //初始化地图层级
+                            center: [116.397428, 39.90923] //初始化地图中心点
+                        });
+                    },
+                    onCityChange: function(city) {
+                        this.city = city;
+                    },
+                    onKeywordsChange: function(keywords) {
+                        this.keywords = keywords;
+                    },
+                    loadPlaceSearch: function() {
+                        let vm = this
+                        AMap.service(["AMap.PlaceSearch"], function() {
+                            //构造地点查询类
+                            var placeSearch = new AMap.PlaceSearch({ 
+                                pageSize: 5, // 单页显示结果条数
+                                pageIndex: 1, // 页码
+                                city: "010", // 兴趣点城市
+                                citylimit: true,  //是否强制限制在设置的城市内搜索
+                                map: vm.map, // 展现结果的地图实例
+                                panel: "panel", // 结果列表将在此容器中进行展示。
+                                autoFitView: true // 是否自动调整地图视野使绘制的 Marker点都处于视口的可见范围
+                            });
+                            //关键字查询
+                            placeSearch.search(vm.keywords);
+                        });
+                    },
+                },
+                mounted: function() {
+                    this.createMap();
+                }
+            });
+        </script>
+
+        <style type="text/css">
+            #searchFlex {
+                display: flex;
+                justify-content: center;
+            }
+            #search {
+                margin-top: 20px;
+            }
+            #container {
+                margin-top: 166px;
+                height: -webkit-fill-available !important;
+            }
+            #panel {
+                position: absolute;
+                background-color: white;
+                max-height: 90%;
+                overflow-y: auto;
+                top: 10px;
+                right: 10px;
+                width: 280px;
+                margin-top: 166px;
+            }
+        </style>
+    </body>
+</html>
